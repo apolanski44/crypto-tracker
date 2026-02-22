@@ -26,5 +26,6 @@ public class CryptoCurrency
     @Column(name = "current_price", precision = 18, scale = 8)
     private BigDecimal currentPrice;
 
+    @Column(name = "last_updated_at")
     private LocalDateTime lastUpdatedAt;
 }
