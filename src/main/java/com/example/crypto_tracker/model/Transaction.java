@@ -2,6 +2,7 @@ package com.example.crypto_tracker.model;
 
 import com.example.crypto_tracker.model.enums.TransactionType;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -33,8 +34,10 @@ public class Transaction
     private BigDecimal purchasePrice;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private TransactionType type;
 
+    @Column(nullable = false)
     private LocalDateTime createdAt;
 
     @PrePersist
