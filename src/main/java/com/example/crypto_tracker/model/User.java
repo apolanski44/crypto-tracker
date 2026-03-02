@@ -1,7 +1,7 @@
 package com.example.crypto_tracker.model;
 
+import com.example.crypto_tracker.enums.UserRole;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -25,6 +25,9 @@ public class User
     private String password;
     private String firstName;
     private String lastName;
+
+    @Column(nullable = false)
+    private UserRole role;
 
     @Column(nullable = false)
     private LocalDateTime createdAt;
