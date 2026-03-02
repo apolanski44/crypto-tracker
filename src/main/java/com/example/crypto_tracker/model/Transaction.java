@@ -1,8 +1,7 @@
 package com.example.crypto_tracker.model;
 
-import com.example.crypto_tracker.model.enums.TransactionType;
+import com.example.crypto_tracker.enums.TransactionType;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
