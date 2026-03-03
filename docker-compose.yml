@@ -8,3 +8,8 @@ services:
       MARIADB_DATABASE: crypto_tracker_db
       MARIADB_USER: user
       MARIADB_PASSWORD: password
+  mailpit:
+    image: axllent/mailpit
+    ports:
+      - "1025:1025"
+      - "8025:8025"
