@@ -2,8 +2,12 @@ package com.example.crypto_tracker.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.JdbcTypeCode;
+
 import java.math.BigDecimal;
+import java.sql.Types;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(name = "crypto_currencies")
@@ -15,7 +19,9 @@ public class CryptoCurrency
 {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private String id;
+    @JdbcTypeCode(Types.VARCHAR)
+    @Column(name = "id", length = 36, nullable = false, updatable = false)
+    private UUID id;
 
     @Column(unique = true, nullable = false)
     private String symbol;
