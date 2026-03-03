@@ -3,8 +3,12 @@ package com.example.crypto_tracker.model;
 import com.example.crypto_tracker.enums.TransactionType;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.JdbcTypeCode;
+
 import java.math.BigDecimal;
+import java.sql.Types;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(name = "transactions")
@@ -16,7 +20,9 @@ public class Transaction
 {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private String id;
+    @JdbcTypeCode(Types.VARCHAR)
+    @Column(name = "id", length = 36, nullable = false, updatable = false)
+    private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
