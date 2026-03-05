@@ -35,7 +35,7 @@ public class Transaction
     @Column(nullable = false, precision = 18, scale = 8)
     private BigDecimal amount;
 
-    @Column(name = "purchase_price", nullable = false, precision = 18, scale = 2)
+    @Column(name = "purchase_price", nullable = false, precision = 18, scale = 8)
     private BigDecimal purchasePrice;
 
     @Enumerated(EnumType.STRING)
