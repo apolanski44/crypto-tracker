@@ -10,9 +10,8 @@ CREATE TABLE users (
 CREATE TABLE crypto_currencies (
     id VARCHAR(36) PRIMARY KEY,
     symbol VARCHAR(10) NOT NULL UNIQUE,
-    api_id VARCHAR(255) NOT NULL,
-    current_price DECIMAL(18, 8),
-    last_updated_at DATETIME
+    api_id VARCHAR(255) NOT NULL UNIQUE,
+    name VARCHAR(255) NOT NULL
 );
 
 CREATE TABLE transactions (
@@ -20,9 +19,8 @@ CREATE TABLE transactions (
     user_id VARCHAR(36) NOT NULL,
     crypto_currency_id VARCHAR(36) NOT NULL,
     amount DECIMAL(18, 8) NOT NULL,
-    purchase_price DECIMAL(18, 2) NOT NULL,
+    purchase_price DECIMAL(18, 8) NOT NULL,
     type VARCHAR(10) NOT NULL,
     created_at DATETIME NOT NULL,
-    CONSTRAINT fk_user FOREIGN KEY (user_id) REFERENCES users(id),
     CONSTRAINT fk_crypto FOREIGN KEY (crypto_currency_id) REFERENCES crypto_currencies(id)
 );
