@@ -1,22 +1,38 @@
 package com.example.crypto_tracker.controller.auth;
 
-import com.example.crypto_tracker.dto.user.CreateUserDTO;
-import com.example.crypto_tracker.model.User;
-import com.example.crypto_tracker.service.auth.AuthService;
+import com.example.crypto_tracker.dto.auth.AuthRequest;
+import com.example.crypto_tracker.dto.auth.AuthResponse;
+import com.example.crypto_tracker.dto.auth.VerificationRequest;
+import com.example.crypto_tracker.service.auth.LoginService;
+import com.example.crypto_tracker.service.auth.RegistrationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
 public class AuthController {
-    private final AuthService authService;
+    private final RegistrationService authService;
+    private final LoginService loginService;
 
-    @PostMapping("register")
+    @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
-    public User register(@RequestBody @Valid CreateUserDTO dto) {
-        return authService.register(dto);
+    public void register(@RequestBody @Valid AuthRequest dto) {
+        authService.register(dto);
+    }
+
+    @PostMapping("/verify")
+    public void verify(@RequestBody @Valid VerificationRequest request) {
+        authService.confirmEmail(request.getCode());
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<AuthResponse> login(@RequestBody @Valid AuthRequest dto) {
+        String token = loginService.login(dto);
+
+        return ResponseEntity.ok(new AuthResponse(token));
     }
 }
