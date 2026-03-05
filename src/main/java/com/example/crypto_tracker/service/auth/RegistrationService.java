@@ -1,6 +1,6 @@
 package com.example.crypto_tracker.service.auth;
 
-import com.example.crypto_tracker.dto.auth.RegistrationDTO;
+import com.example.crypto_tracker.dto.auth.AuthRequest;
 import com.example.crypto_tracker.exception.UserAlreadyVerifiedException;
 import com.example.crypto_tracker.model.User;
 import com.example.crypto_tracker.model.VerificationToken;
@@ -11,13 +11,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-public class AuthService {
+public class RegistrationService {
     private final UserService userService;
     private final VerificationTokenService tokenService;
     private final AuthMailer authMailer;
 
     @Transactional
-    public void register(RegistrationDTO dto) {
+    public void register(AuthRequest dto) {
         userService.registerUser(dto)
                 .ifPresent(user -> {
                     String token = tokenService.createToken(user);
