@@ -4,9 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.JdbcTypeCode;
 
-import java.math.BigDecimal;
 import java.sql.Types;
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -23,15 +21,12 @@ public class CryptoCurrency
     @Column(name = "id", length = 36, nullable = false, updatable = false)
     private UUID id;
 
-    @Column(unique = true, nullable = false)
+    @Column(length = 10, unique = true, nullable = false)
     private String symbol;
 
-    @Column(name = "api_id", nullable = false)
+    @Column(name = "api_id", nullable = false, unique = true)
     private String apiId;
 
-    @Column(name = "current_price", precision = 18, scale = 8)
-    private BigDecimal currentPrice;
-
-    @Column(name = "last_updated_at")
-    private LocalDateTime lastUpdatedAt;
+    @Column(name = "name", nullable = false)
+    private  String name;
 }
