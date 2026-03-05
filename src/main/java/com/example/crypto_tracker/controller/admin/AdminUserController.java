@@ -7,6 +7,7 @@ import com.example.crypto_tracker.service.user.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -15,6 +16,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/admin/users")
 @RequiredArgsConstructor
+@PreAuthorize("hasRole('ADMIN')")
 public class AdminUserController {
     private final UserService userService;
 
@@ -24,6 +26,7 @@ public class AdminUserController {
     }
 
     @GetMapping("/{id}")
+    //TODO: Prepare UserResponseDTO
     public User getUserById(@PathVariable UUID id) {
         return userService.getUserById(id);
     }
