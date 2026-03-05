@@ -1,23 +1,26 @@
 package com.example.crypto_tracker.service.user;
 
 import com.example.crypto_tracker.dto.user.CreateUserDTO;
+import com.example.crypto_tracker.dto.auth.AuthRequest;
 import com.example.crypto_tracker.dto.user.UpdateUserDTO;
 import com.example.crypto_tracker.exception.EmailAlreadyTakenException;
 import com.example.crypto_tracker.exception.UserNotFoundException;
 import com.example.crypto_tracker.model.User;
 import com.example.crypto_tracker.repository.UserRepository;
-import jakarta.validation.constraints.Email;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
+@Slf4j
 public class UserService {
     private final UserUpdater userUpdater;
     private final UserRepository userRepository;
@@ -62,5 +65,20 @@ public class UserService {
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
 
         userRepository.delete(userToDelete);
+    }
+
+    @Transactional
+    public Optional<User> registerUser(AuthRequest dto) {
+        if (userRepository.existsByEmail(dto.getEmail())) {
+            log.info("Registration attempt for existing email: {}", dto.getEmail());
+
+            return Optional.empty();
+        }
+
+        User user = userMapper.toEntity(dto);
+
+        user.setPassword(passwordEncoder.encode(dto.getPassword()));
+
+        return Optional.of(userRepository.save(user));
     }
 }

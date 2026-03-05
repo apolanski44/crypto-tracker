@@ -5,12 +5,14 @@ import com.example.crypto_tracker.model.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 //We can use MapStruct, but for testing purposes I've created helper service
 @Component
 @RequiredArgsConstructor public class UserUpdater {
     private final PasswordEncoder passwordEncoder;
 
+    @Transactional
     public void updateEntityFromDto(UpdateUserDTO dto, User user) {
         if (dto == null || user == null)
         {
