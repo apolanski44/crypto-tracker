@@ -15,6 +15,7 @@ public class CryptoCurrencyMapper {
                 .symbol(dto.getSymbol())
                 .apiId(dto.getApiId())
                 .name(dto.getName())
+                .image(dto.getImage())
                 .build();
     }
 }

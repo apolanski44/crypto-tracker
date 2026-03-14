@@ -11,7 +11,8 @@ CREATE TABLE crypto_currencies (
     id VARCHAR(36) PRIMARY KEY,
     symbol VARCHAR(10) NOT NULL UNIQUE,
     api_id VARCHAR(255) NOT NULL UNIQUE,
-    name VARCHAR(255) NOT NULL
+    name VARCHAR(255) NOT NULL,
+    image VARCHAR(255) DEFAULT NULL
 );
 
 CREATE TABLE transactions (

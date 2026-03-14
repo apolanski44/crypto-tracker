@@ -8,8 +8,23 @@ services:
       MARIADB_DATABASE: crypto_tracker_db
       MARIADB_USER: user
       MARIADB_PASSWORD: password
+
   mailpit:
     image: axllent/mailpit
     ports:
       - "1025:1025"
       - "8025:8025"
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+
+  redis-insight:
+    image: redislabs/redisinsight:latest
+    ports:
+      - "5540:5540"
+    restart: unless-stopped
+    depends_on:
+      - redis

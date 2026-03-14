@@ -28,5 +28,8 @@ public class CryptoCurrency
     private String apiId;
 
     @Column(name = "name", nullable = false)
-    private  String name;
+    private String name;
+
+    @Column(name = "image")
+    private String image;
 }

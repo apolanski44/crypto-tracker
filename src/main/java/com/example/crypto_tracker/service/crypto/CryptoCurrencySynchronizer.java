@@ -3,13 +3,18 @@ package com.example.crypto_tracker.service.crypto;
 import com.example.crypto_tracker.dto.crypto.ExternalCryptoDto;
 import com.example.crypto_tracker.model.CryptoCurrency;
 import com.example.crypto_tracker.repository.CryptoCurrencyRepository;
+import com.example.crypto_tracker.service.cache.CryptoMarketCacheService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -17,13 +22,11 @@ import java.util.List;
 public class CryptoCurrencySynchronizer {
     private final CryptoCurrencyRepository repository;
     private final CryptoCurrencyMapper cryptoCurrencyMapper;
+    private final CryptoMarketCacheService cryptoMarketCacheService;
 
     @Transactional
-    @CacheEvict(value = "currencies", allEntries = true)
     public void synchronizeData(List<ExternalCryptoDto> externalData) {
-        List<String> existingApiIds = repository.findAll().stream()
-                .map(CryptoCurrency::getApiId)
-                .toList();
+        Set<String> existingApiIds = repository.findAllApiIds();
 
         List<CryptoCurrency> newCryptos = externalData.stream()
                 .filter(dto -> !existingApiIds.contains(dto.getApiId()))
@@ -34,8 +37,9 @@ public class CryptoCurrencySynchronizer {
             repository.saveAll(newCryptos);
 
             log.info("Successfully saved {} new cryptocurrencies", newCryptos.size());
-        } else {
-            log.info("No new cryptocurrencies to save");
         }
+
+        cryptoMarketCacheService.cacheDashboard(externalData);
+        cryptoMarketCacheService.cachePrices(externalData);
     }
 }
