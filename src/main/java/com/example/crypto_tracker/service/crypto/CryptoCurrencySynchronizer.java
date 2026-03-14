@@ -20,6 +20,7 @@ import java.util.Set;
 @RequiredArgsConstructor
 @Slf4j
 public class CryptoCurrencySynchronizer {
+    //TODO: Remove logs after implementing tests
     private final CryptoCurrencyRepository repository;
     private final CryptoCurrencyMapper cryptoCurrencyMapper;
     private final CryptoMarketCacheService cryptoMarketCacheService;
