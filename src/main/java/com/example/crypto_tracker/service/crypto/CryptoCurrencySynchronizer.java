@@ -41,5 +41,7 @@ public class CryptoCurrencySynchronizer {
 
         cryptoMarketCacheService.cacheDashboard(externalData);
         cryptoMarketCacheService.cachePrices(externalData);
+
+        log.info("Synchronization finished");
     }
 }

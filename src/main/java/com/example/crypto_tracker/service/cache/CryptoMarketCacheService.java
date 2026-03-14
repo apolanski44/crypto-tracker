@@ -3,6 +3,7 @@ package com.example.crypto_tracker.service.cache;
 import com.example.crypto_tracker.dto.crypto.DashboardCurrencyDto;
 import com.example.crypto_tracker.dto.crypto.ExternalCryptoDto;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -10,6 +11,7 @@ import java.math.BigDecimal;
 import java.time.Duration;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CryptoMarketCacheService {
@@ -20,13 +22,19 @@ public class CryptoMarketCacheService {
     private final RedisTemplate<String, Object> redisTemplate;
 
     public void cachePrices(List<ExternalCryptoDto> externalData) {
+        log.info("Caching prices for {} items", externalData.size());
+
         externalData.forEach(dto ->{
             String key = buildPriceKey(dto.getApiId());
             redisTemplate.opsForValue().set(key, dto.getCurrentPrice(), PRICE_TTL);
         });
+
+        log.info("Prices cached");
     }
 
     public void cacheDashboard(List<ExternalCryptoDto> externalData) {
+        log.info("Caching dashboard for {} items", externalData.size());
+
         List<DashboardCurrencyDto> dashboardData = externalData.stream()
                 .map(dto -> new DashboardCurrencyDto(
                         dto.getApiId(),
@@ -38,6 +46,8 @@ public class CryptoMarketCacheService {
                 .toList();
 
         redisTemplate.opsForValue().set(DASHBOARD_KEY, dashboardData, DASHBOARD_TTL);
+
+        log.info("Dashboard cached under key {}", DASHBOARD_KEY);
     }
 
     public BigDecimal getPrice(String apiId) {
