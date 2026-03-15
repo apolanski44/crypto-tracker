@@ -4,37 +4,30 @@ import com.example.crypto_tracker.dto.crypto.DashboardCurrencyDto;
 import com.example.crypto_tracker.dto.crypto.ExternalCryptoDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.List;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class CryptoMarketCacheService {
+
     private static final Duration PRICE_TTL = Duration.ofMinutes(15);
     private static final Duration DASHBOARD_TTL = Duration.ofMinutes(15);
     private static final String DASHBOARD_KEY = "dashboard:currencies";
+    private static final String PRICE_KEY_PREFIX = "price:";
 
-    private final RedisTemplate<String, Object> redisTemplate;
-
-    public void cachePrices(List<ExternalCryptoDto> externalData) {
-        log.info("Caching prices for {} items", externalData.size());
-
-        externalData.forEach(dto ->{
-            String key = buildPriceKey(dto.getApiId());
-            redisTemplate.opsForValue().set(key, dto.getCurrentPrice(), PRICE_TTL);
-        });
-
-        log.info("Prices cached");
-    }
+    private final StringRedisTemplate stringRedisTemplate;
+    private final ObjectMapper objectMapper;
 
     public void cacheDashboard(List<ExternalCryptoDto> externalData) {
-        log.info("Caching dashboard for {} items", externalData.size());
-
         List<DashboardCurrencyDto> dashboardData = externalData.stream()
                 .map(dto -> new DashboardCurrencyDto(
                         dto.getApiId(),
@@ -45,24 +38,60 @@ public class CryptoMarketCacheService {
                 ))
                 .toList();
 
-        redisTemplate.opsForValue().set(DASHBOARD_KEY, dashboardData, DASHBOARD_TTL);
+        try {
+            String json = objectMapper.writeValueAsString(dashboardData);
+            stringRedisTemplate.opsForValue().set(DASHBOARD_KEY, json, DASHBOARD_TTL);
 
-        log.info("Dashboard cached under key {}", DASHBOARD_KEY);
-    }
-
-    public BigDecimal getPrice(String apiId) {
-        Object value = redisTemplate.opsForValue().get(buildPriceKey(apiId));
-
-        return value instanceof BigDecimal bigDecimal ? bigDecimal : null;
+            log.info("Dashboard cached under key {}", DASHBOARD_KEY);
+        } catch (Exception e) {
+            throw new IllegalStateException("Failed to cache dashboard data in Redis", e);
+        }
     }
 
     public List<DashboardCurrencyDto> getDashboard() {
-        Object value = redisTemplate.opsForValue().get(DASHBOARD_KEY);
+        String json = stringRedisTemplate.opsForValue().get(DASHBOARD_KEY);
 
-        return value instanceof List<?> list ?  (List<DashboardCurrencyDto>) list : null;
+        if (json == null || json.isBlank()) {
+            return null;
+        }
+
+        try {
+            return objectMapper.readValue(
+                    json.getBytes(StandardCharsets.UTF_8),
+                    new TypeReference<List<DashboardCurrencyDto>>() {}
+            );
+        } catch (Exception e) {
+            throw new IllegalStateException("Failed to read dashboard data from Redis", e);
+        }
+    }
+
+    public void cachePrices(List<ExternalCryptoDto> externalData) {
+        externalData.forEach(dto ->
+                stringRedisTemplate.opsForValue().set(
+                        buildPriceKey(dto.getApiId()),
+                        dto.getCurrentPrice().toPlainString(),
+                        PRICE_TTL
+                )
+        );
+
+        log.info("Cached prices for {} cryptocurrencies", externalData.size());
+    }
+
+    public BigDecimal getPrice(String apiId) {
+        String value = stringRedisTemplate.opsForValue().get(buildPriceKey(apiId));
+
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+
+        try {
+            return new BigDecimal(value);
+        } catch (NumberFormatException e) {
+            throw new IllegalStateException("Invalid price format in Redis for apiId: " + apiId, e);
+        }
     }
 
     private String buildPriceKey(String apiId) {
-        return "price:" + apiId;
+        return PRICE_KEY_PREFIX + apiId;
     }
 }
