@@ -1,0 +1,2 @@
+ALTER TABLE users
+    ADD COLUMN account_verified BOOLEAN NOT NULL DEFAULT FALSE;
