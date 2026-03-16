@@ -4,6 +4,7 @@ import com.example.crypto_tracker.client.CryptoCurrencyClient;
 import com.example.crypto_tracker.dto.crypto.ExternalCryptoDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -12,6 +13,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@ConditionalOnProperty(name = "crypto.sync.enabled", havingValue = "true", matchIfMissing = true)
 public class CryptoMarketSyncScheduler {
     private final CryptoCurrencyClient currencyClient;
     private final CryptoCurrencySynchronizer cryptoCurrencySynchronizer;
