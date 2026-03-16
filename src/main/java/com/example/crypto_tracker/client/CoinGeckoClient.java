@@ -2,6 +2,7 @@ package com.example.crypto_tracker.client;
 
 import com.example.crypto_tracker.dto.crypto.ExternalCryptoDto;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
@@ -9,6 +10,7 @@ import org.springframework.web.client.RestClient;
 import java.util.List;
 
 @Component
+@ConditionalOnProperty(name = "application.client.enabled", havingValue = "true", matchIfMissing = true)
 public class CoinGeckoClient implements CryptoCurrencyClient {
     private final RestClient restClient;
 
