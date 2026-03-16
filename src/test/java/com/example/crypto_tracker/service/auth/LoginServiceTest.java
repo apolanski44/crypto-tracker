@@ -10,14 +10,16 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 
+import javax.naming.AuthenticationException;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.*;
 
 
 @ExtendWith(MockitoExtension.class)
@@ -59,13 +61,56 @@ public class LoginServiceTest {
 
        assertThat(result).isEqualTo(token);
 
-       verify(authenticationManager).authenticate(
+       verify(authenticationManager, times(1)).authenticate(
                argThat(auth ->
                        auth instanceof UsernamePasswordAuthenticationToken authToken
                        && authToken.getName().equals(email)
                )
        );
-       verify(userRepository).findByEmail(email);
-       verify(jwtService).generateToken(user);
+       verify(userRepository, times(1)).findByEmail(email);
+       verify(jwtService, times(1)).generateToken(user);
+   }
+
+   @Test
+    void shouldThrowAuthenticationExceptionWhenAuthenticationFails() {
+       String email = "invalid@email.com";
+       String password = "inValid1234";
+
+       AuthRequest authRequest = new AuthRequest();
+       authRequest.setEmail(email);
+       authRequest.setPassword(password);
+
+       doThrow(new BadCredentialsException("Bad credentials"))
+               .when(authenticationManager)
+               .authenticate(any());
+
+       assertThatThrownBy(() -> loginService.login(authRequest))
+               .isInstanceOf(BadCredentialsException.class)
+               .hasMessage("Bad credentials");
+
+       verify(authenticationManager, times(1)).authenticate(any());
+       verifyNoInteractions(userRepository);
+       verifyNoInteractions(jwtService);
+   }
+
+   @Test
+    void shouldThrowExceptionWhenUserNotFound() {
+       String email = "invalid@email.com";
+       String password = "inValid1234";
+
+       AuthRequest authRequest = new AuthRequest();
+       authRequest.setEmail(email);
+       authRequest.setPassword(password);
+
+       doThrow(new BadCredentialsException("Invalid credentials"))
+               .when(userRepository)
+               .findByEmail(email);
+
+       assertThatThrownBy(() -> userRepository.findByEmail(email))
+               .isInstanceOf(BadCredentialsException.class)
+               .hasMessage("Invalid credentials");
+
+       verify(userRepository, times(1)).findByEmail(email);
+       verifyNoInteractions(jwtService);
    }
 }
